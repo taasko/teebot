@@ -1,0 +1,21 @@
+{
+  "name": "teebot",
+  "version": "1.0.0",
+  "description": "Teeworlds bot for Discord.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon .",
+    "start": "node ."
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@w3groupfinland/teeworlds-econ": "^1.3.4",
+    "discord.js": "^12.1.1",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3",
+    "prettier": "^2.0.4"
+  }
+}
