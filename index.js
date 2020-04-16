@@ -1,6 +1,8 @@
 require("dotenv").config();
 const Discord = require("discord.js");
 const TeeworldsEcon = require("teeworlds-econ-api/build/TwEconClient");
+const memoize = require("lodash/memoize");
+const debounce = require("lodash/debounce");
 
 /*
  * Initialize connections.
@@ -22,7 +24,7 @@ econ.connect();
  */
 
 econ.on("game.team_join", (e) => {
-  changeTeam(e.clientName, e.teamId);
+  debouncedChangeTeam(e.clientName, e.teamId);
 });
 
 /*
@@ -30,6 +32,14 @@ econ.on("game.team_join", (e) => {
  */
 
 const CTF_TEAM_MAPPING = { 0: "RED", 1: "BLUE" };
+
+function memoizeDebounce(func, wait = 0, options = {}) {
+  const mem = memoize(() => debounce(func, wait, options), options.resolver);
+
+  return function () {
+    mem.apply(this, arguments).apply(this, arguments);
+  };
+}
 
 function changeTeam(playerName, teamId) {
   bot.guilds.cache.forEach((guild) => {
@@ -52,3 +62,5 @@ function changeTeam(playerName, teamId) {
     }
   });
 }
+
+const debouncedChangeTeam = memoizeDebounce(changeTeam, 2000);
