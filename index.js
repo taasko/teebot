@@ -46,7 +46,7 @@ function changeTeam(playerName, teamId) {
     const members = guild.members.cache;
     const member = members.find(
       (m) =>
-        m.nickname.toLowerCase() === playerName.toLowerCase() ||
+        (m.nickname && m.nickname.toLowerCase() === playerName.toLowerCase()) ||
         m.user.username.toLowerCase() === playerName.toLowerCase()
     );
 
