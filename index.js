@@ -46,8 +46,8 @@ function changeTeam(playerName, teamId) {
     const members = guild.members.cache;
     const member = members.find(
       (m) =>
-        (m.nickname || m.user.username).toLowerCase() ===
-        playerName.toLowerCase()
+        m.nickname.toLowerCase() === playerName.toLowerCase() ||
+        m.user.username.toLowerCase() === playerName.toLowerCase()
     );
 
     if (member) {
@@ -57,7 +57,11 @@ function changeTeam(playerName, teamId) {
       );
 
       if (channel && channel.id) {
-        member.voice.setChannel(channel.id);
+        try {
+          member.voice.setChannel(channel.id);
+        } catch (e) {
+          console.error("Changing member channel failed.", e);
+        }
       }
     }
   });
