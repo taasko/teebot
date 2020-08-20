@@ -10,14 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.2.0",
+    "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.20",
     "teeworlds-econ-api": "git://github.com/richrd/teeworlds-econ.git#build"
   },
   "devDependencies": {
-    "nodemon": "^2.0.3",
-    "prettier": "^2.0.4",
+    "nodemon": "^2.0.4",
+    "prettier": "^2.0.5",
     "shipit-cli": "^5.3.0",
     "shipit-deploy": "^5.3.0",
     "shipit-shared": "^4.4.2"
