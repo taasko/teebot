@@ -7,6 +7,7 @@ const debounce = require("lodash/debounce");
 /*
  * Settings.
  */
+
 let FRIDAY_MODE_ENABLED = false;
 const CHANNEL_MAPPING = { 0: "RED", 1: "BLUE", 3: "general" };
 
@@ -15,7 +16,7 @@ const CHANNEL_MAPPING = { 0: "RED", 1: "BLUE", 3: "general" };
  */
 
 const bot = new Discord.Client({ token: process.env.DISCORD_TOKEN });
-bot.login();
+bot.login().catch(console.error);
 bot.on("ready", () => console.log("Discord bot connected."));
 
 const econ = new TeeworldsEcon.TwEconClient(
@@ -25,9 +26,7 @@ const econ = new TeeworldsEcon.TwEconClient(
 );
 econ
   .connect()
-  .then(() => {
-    console.log("Econ connected.");
-  })
+  .then(() => console.log("Econ connected."))
   .catch((e) => console.error("Connecting econ failed.", e));
 
 /*
@@ -35,21 +34,21 @@ econ
  */
 
 econ.on("game.team_join", (e) => {
-  if (FRIDAY_MODE_ENABLED === false) {
+  if (FRIDAY_MODE_ENABLED === false)
     debouncedChangeTeam(e.clientName, e.teamId);
-  }
 });
 
 econ.on("chat.chat", (e) => {
-  if (e.text && typeof e.text === "string" && e.text.charAt(0) === "!") {
-    if (e.text === "!tbot fridaymode on") {
-      FRIDAY_MODE_ENABLED = true;
-      moveAllMembers(3);
-      econ.send("broadcast Teebot: Friday Mode activated!");
-    } else if (e.text === "!tbot fridaymode off") {
-      FRIDAY_MODE_ENABLED = false;
-      econ.send("broadcast Teebot: Friday Mode disabled.");
-    }
+  const command =
+    e.text && typeof e.text === "string" && e.text.charAt(0) === "!"
+      ? e.text.substring(1)
+      : null;
+
+  if (!command) return;
+
+  switch (command) {
+    case "fridaymode":
+      toggleFridayMode().catch(console.error);
   }
 });
 
@@ -59,31 +58,34 @@ econ.on("chat.chat", (e) => {
 
 async function changeTeam(playerName, teamId) {
   const guild = await getGuild();
+  if (!guild) return;
 
-  if (guild) {
-    const channelId = getVoiceChannelId(guild, teamId);
+  const channelId = getVoiceChannelId(guild, teamId);
+  if (!channelId) return;
 
-    if (channelId) {
-      const member = getMemberByPlayerName(guild, playerName);
-
-      if (member) {
-        setMemberVoiceChannel(member, channelId);
-      }
-    }
-  }
+  const member = getMemberByPlayerName(guild, playerName);
+  if (member) setMemberVoiceChannel(member, channelId);
 }
 
 async function moveAllMembers(teamId) {
   const guild = await getGuild();
+  if (!guild) return;
 
-  if (guild) {
-    const channelId = getVoiceChannelId(guild, teamId);
+  const channelId = getVoiceChannelId(guild, teamId);
+  if (!channelId) return;
 
-    if (channelId) {
-      const members = getVoiceConnectedMembers(guild);
+  const members = getVoiceConnectedMembers(guild);
+  members.forEach((m) => setMemberVoiceChannel(m, channelId));
+}
 
-      members.forEach((m) => setMemberVoiceChannel(m, channelId));
-    }
+async function toggleFridayMode() {
+  if (FRIDAY_MODE_ENABLED === false) {
+    FRIDAY_MODE_ENABLED = true;
+    await moveAllMembers(3);
+    econ.send("broadcast Teebot: Friday Mode is now activated!");
+  } else {
+    FRIDAY_MODE_ENABLED = false;
+    econ.send("broadcast Teebot: Friday Mode is now disabled.");
   }
 }
 
@@ -126,9 +128,9 @@ const getVoiceChannelId = (guild, teamId) => {
   return channel && channel.id ? channel.id : null;
 };
 
-const setMemberVoiceChannel = (member, channelId) => {
+const setMemberVoiceChannel = async (member, channelId) => {
   try {
-    member.voice.setChannel(channelId);
+    await member.voice.setChannel(channelId);
   } catch (e) {
     console.error("Changing member channel failed.", e);
   }
