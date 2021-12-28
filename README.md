@@ -4,7 +4,7 @@ Teeworlds bot for Discord. Main feature is to change player's voice channel when
 
 ## Requirements
 
-- Node.js 12
+- Node.js
 
 ## Installation & other commands
 
