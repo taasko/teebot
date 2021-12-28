@@ -5,6 +5,8 @@ module.exports = {
       script: "index.js",
       time: true,
       cwd: "/var/app/teebot/current/",
+      /* If PM2 not running on wanted Node.js version: */
+      // interpreter: "/bin/node",
       env: {
         NODE_ENV: "development",
       },
