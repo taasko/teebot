@@ -1,6 +1,6 @@
 require("dotenv").config();
 const Discord = require("discord.js");
-const TeeworldsEcon = require("teeworlds-econ-api/build/TwEconClient");
+const TeeworldsEcon = require("teeworlds-econ/build/TwEconClient");
 const memoize = require("lodash/memoize");
 const debounce = require("lodash/debounce");
 
