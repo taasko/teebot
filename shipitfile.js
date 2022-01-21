@@ -24,9 +24,8 @@ module.exports = (shipit) => {
   );
 
   shipit.blTask("install-backend", () => {
-    // Econ package has deps listed in `devDependencies` so have to install dev dependencies too.
     return shipit.remote(
-      `cd ${shipit.releasePath} && npm install --production && npm install --only=dev`
+      `cd ${shipit.releasePath} && npm install --production`
     );
   });
 
