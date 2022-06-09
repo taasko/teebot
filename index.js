@@ -141,7 +141,7 @@ const getVoiceChannelId = (guild, teamId) => {
   const channel = guild.channels.cache.find(
     (channel) =>
       channel.name.includes(CHANNEL_MAPPING[teamId]) &&
-      DiscordTypes.ChannelTypes.GUILD_VOICE
+      channel.type === "GUILD_VOICE" // DiscordTypes.ChannelTypes.GUILD_VOICE
   );
 
   return channel && channel.id ? channel.id : null;
