@@ -30,5 +30,5 @@ npm run dev
 - Deploy.
 
 ```
-npx shipit production deploy
+npm run deploy
 ```
