@@ -22,7 +22,7 @@ module.exports = (shipit) => {
   shipit.on("published", () => shipit.start(["install", "restart"]));
 
   shipit.blTask("install", () => {
-    return shipit.remote(`npm install --production`, {
+    return shipit.remote(`npm ci --production`, {
       cwd: shipit.releasePath,
     });
   });
