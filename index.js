@@ -1,5 +1,7 @@
 require("dotenv").config();
+const debug = require("debug")("teebot");
 const Discord = require("discord.js");
+const DiscordTypes = require("discord-api-types/v9");
 const TeeworldsEcon = require("teeworlds-econ/build/TwEconClient");
 const memoize = require("lodash.memoize");
 const debounce = require("lodash.debounce");
@@ -15,7 +17,10 @@ const CHANNEL_MAPPING = { 0: "RED", 1: "BLUE", 3: "general" };
  * Initialize connections.
  */
 
-const bot = new Discord.Client({ token: process.env.DISCORD_TOKEN });
+const bot = new Discord.Client({
+  token: process.env.DISCORD_TOKEN,
+  intents: [Discord.Intents.FLAGS.GUILDS],
+});
 bot.login().catch(console.error);
 bot.on("ready", () => console.log("Discord bot connected."));
 
@@ -64,7 +69,7 @@ async function changeTeam(playerName, teamId) {
   if (!channelId) return;
 
   const member = getMemberByPlayerName(guild, playerName);
-  if (member) setMemberVoiceChannel(member, channelId);
+  if (member) return setMemberVoiceChannel(member, channelId);
 }
 
 async function moveAllMembers(teamId) {
@@ -74,7 +79,7 @@ async function moveAllMembers(teamId) {
   const channelId = getVoiceChannelId(guild, teamId);
   if (!channelId) return;
 
-  const members = getVoiceConnectedMembers(guild);
+  const members = guild.members.cache;
   members.forEach((m) => setMemberVoiceChannel(m, channelId));
 }
 
@@ -87,6 +92,8 @@ async function toggleFridayMode() {
     FRIDAY_MODE_ENABLED = false;
     econ.send("broadcast Teebot: Friday Mode is now disabled.");
   }
+
+  debug("friday mode set: %b", FRIDAY_MODE_ENABLED);
 }
 
 /*
@@ -101,12 +108,21 @@ function memoizeDebounce(func, wait = 0, options = {}) {
   };
 }
 
+/**
+ * @return {Promise<Discord.Guild>}
+ */
 const getGuild = () => {
   return bot.guilds.fetch(process.env.DISCORD_GUILD_ID);
 };
 
+/**
+ * @param {Discord.Guild} guild
+ * @param {string} playerName
+ *
+ * @return {Discord.GuildMember|undefined}
+ */
 const getMemberByPlayerName = (guild, playerName) => {
-  const members = getVoiceConnectedMembers(guild);
+  const members = guild.members.cache;
 
   return members.find(
     (m) =>
@@ -115,19 +131,28 @@ const getMemberByPlayerName = (guild, playerName) => {
   );
 };
 
-const getVoiceConnectedMembers = (guild) => {
-  return guild.members.cache.filter((m) => memberIsConnectedToVoice(m));
-};
-
+/**
+ * @param {Discord.Guild} guild
+ * @param {number} teamId
+ *
+ * @return {Discord.Snowflake|null}
+ */
 const getVoiceChannelId = (guild, teamId) => {
   const channel = guild.channels.cache.find(
     (channel) =>
-      channel.name.includes(CHANNEL_MAPPING[teamId]) && channel.type === "voice"
+      channel.name.includes(CHANNEL_MAPPING[teamId]) &&
+      DiscordTypes.ChannelTypes.GUILD_VOICE
   );
 
   return channel && channel.id ? channel.id : null;
 };
 
+/**
+ * @param {Discord.GuildMember} member
+ * @param {Discord.Snowflake} channelId
+ *
+ * @return Promise<void>
+ */
 const setMemberVoiceChannel = async (member, channelId) => {
   try {
     await member.voice.setChannel(channelId);
@@ -135,7 +160,5 @@ const setMemberVoiceChannel = async (member, channelId) => {
     console.error("Changing member channel failed.", e);
   }
 };
-
-const memberIsConnectedToVoice = (member) => member.voice.channelID;
 
 const debouncedChangeTeam = memoizeDebounce(changeTeam, 2000);
