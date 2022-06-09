@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.3.1",
+    "discord.js": "^13.8.0",
     "dotenv": "^8.2.0",
     "lodash.debounce": "^4.0.8",
     "lodash.memoize": "^4.1.2",
