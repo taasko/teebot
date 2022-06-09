@@ -19,19 +19,17 @@ module.exports = (shipit) => {
     },
   });
 
-  shipit.on("published", () =>
-    shipit.start(["install-backend", "restart-backend"])
-  );
+  shipit.on("published", () => shipit.start(["install", "restart"]));
 
-  shipit.blTask("install-backend", () => {
-    return shipit.remote(
-      `cd ${shipit.releasePath} && npm install --production`
-    );
+  shipit.blTask("install", () => {
+    return shipit.remote(`npm install --production`, {
+      cwd: shipit.releasePath,
+    });
   });
 
-  shipit.blTask("restart-backend", () => {
-    return shipit.remote(
-      `cd ${shipit.config.deployTo} && pm2 startOrRestart current/ecosystem.config.js`
-    );
+  shipit.blTask("restart", () => {
+    return shipit.remote(`pm2 startOrRestart current/ecosystem.config.js`, {
+      cwd: shipit.config.deployTo,
+    });
   });
 };
